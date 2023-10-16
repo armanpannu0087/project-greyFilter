@@ -20,7 +20,14 @@ const unzipper = require("unzipper"),
  * @param {string} pathOut
  * @return {promise}
  */
-const unzip = (pathIn, pathOut) => {};
+const unzip = (pathIn, pathOut) => {
+  return new Promise((resolve,reject)=> {
+    fs.createReadStream(pathIn)
+    .pipe(unzipper.Extract({path:pathOut}))
+    .on("close", () => resolve())
+    .on("error", () => reject(err));
+  });
+};
 
 /**
  * Description: read all the png files from given directory and return Promise containing array of each png file path
@@ -28,7 +35,18 @@ const unzip = (pathIn, pathOut) => {};
  * @param {string} path
  * @return {promise}
  */
-const readDir = (dir) => {};
+const readDir = (dir) => {
+  return new Promise((reject,resolve)=>{
+    fs.readdir(dir,(err,files)=>{
+      if(err){
+        reject(err);
+      } else{
+        const pngFiles = files.filter((file)=> path.extname(file).toLowerCase() === '.png');
+        resolve (pngFiles.map((file) => path.join(dir,file)));
+      }
+    });
+  });
+};
 
 /**
  * Description: Read in png file by given pathIn,
@@ -38,10 +56,55 @@ const readDir = (dir) => {};
  * @param {string} pathProcessed
  * @return {promise}
  */
-const grayScale = (pathIn, pathOut) => {};
+const grayScale = (pathIn, pathOut) => {
+  return new Promise((resolve,reject)=>{
+    const inputStream = fs.createReadStream(pathIn);
+    const outputStream = fs.createWriteStream(pathOut);
+
+    inputStream
+    .pipe(new PNG())
+    .on('parsed' , function(){
+      for (let y = 0; y < this.height; y++) {
+        for (let x = 0; x < this.width; x++) {
+          const idx = (this.width * y + x) << 2;
+          const gray = Math.round(
+            0.2989 * this.data[idx] +
+            0.5870 * this.data[idx + 1] +
+            0.1140 * this.data[idx + 2]
+          );
+          this.data[idx] = gray;
+          this.data[idx + 1] = gray;
+          this.data[idx + 2] = gray;
+        }
+      }
+      this.pack().pipe(outputStream);
+    })
+    .on('end', ()=>resolve())
+    .on('error', (err)=>reject(err));
+  })
+};
+
+/**
+ * Description: Process images in the zip file, extracting and applying the grayscale filter to each image, then display a success message
+ *
+ * @param {string} zipPath
+ * @param {string} outputPathUnzipped
+ * @param {string} outputPathProcessed
+ * @return {promise}
+ */
+const processImages = (zipPath, outputPathUnzipped, outputPathProcessed) => {
+  return unzip(zipPath, outputPathUnzipped)
+    .then(() => readDir(outputPathUnzipped))
+    .then((pngFiles) => {
+      const processingPromises = pngFiles.map((filePath) => {
+        const outputFilePath = path.join(outputPathProcessed, path.basename(filePath));
+        return grayScale(filePath, outputFilePath);
+      });
+      return Promise.all(processingPromises);
+    });
+};
+
 
 module.exports = {
-  unzip,
-  readDir,
-  grayScale,
+  processImages
 };
