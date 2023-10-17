@@ -45,41 +45,12 @@
 
 
 
-// const path = require("path");
-// const IOhandler = require("./IOhandler");
-// const zipFilePath = path.join( "myfile.zip");
-// const pathUnzipped = path.join( "unzipped");
-// const pathProcessed = path.join( "grayscaled");
-
-
-// IOhandler.unzip(zipFilePath, pathUnzipped)
-//   .then(() => {
-//     console.log("ZIP file unzipped successfully.");
-//     return IOhandler.readDir(pathUnzipped);
-//   })
-//   .then((pngFiles) => {
-//     console.log("List of PNG files:", pngFiles);
-//     pngFiles.forEach((file) => {
-//       const inputPath = path.join(pathUnzipped, file);
-//       const outputPath = path.join(pathProcessed, file);
-//       return IOhandler.grayScale(inputPath, outputPath);
-//     });
-//   })
-//   .then(() => {
-//     console.log("Grayscale processing completed for all PNG files.");
-//   })
-//   .catch((err) => {
-//     console.error("An error occurred:", err);
-//   });
-
-
-
 const path = require("path");
 const IOhandler = require("./IOhandler");
+const zipFilePath = path.join( "myfile.zip");
+const pathUnzipped = path.join( "unzipped");
+const pathProcessed = path.join( "grayscaled");
 
-const zipFilePath = path.join(__dirname, "myfile.zip");
-const pathUnzipped = path.join(__dirname, "unzipped");
-const pathProcessed = path.join(__dirname, "grayscaled");
 
 IOhandler.unzip(zipFilePath, pathUnzipped)
   .then(() => {
@@ -88,16 +59,11 @@ IOhandler.unzip(zipFilePath, pathUnzipped)
   })
   .then((pngFiles) => {
     console.log("List of PNG files:", pngFiles);
-
-    // Create an array of Promises to process each PNG file
-    const processingPromises = pngFiles.map((file) => {
+    pngFiles.forEach((file) => {
       const inputPath = path.join(pathUnzipped, file);
-      const outputPath = path.join(pathProcessed, path.basename(file));
+      const outputPath = path.join(pathProcessed, file);
       return IOhandler.grayScale(inputPath, outputPath);
     });
-
-    // Use Promise.all to ensure all files are processed before proceeding
-    return Promise.all(processingPromises);
   })
   .then(() => {
     console.log("Grayscale processing completed for all PNG files.");
@@ -105,3 +71,37 @@ IOhandler.unzip(zipFilePath, pathUnzipped)
   .catch((err) => {
     console.error("An error occurred:", err);
   });
+
+
+
+// const path = require("path");
+// const IOhandler = require("./IOhandler");
+
+// const zipFilePath = path.join(__dirname, "myfile.zip");
+// const pathUnzipped = path.join(__dirname, "unzipped");
+// const pathProcessed = path.join(__dirname, "grayscaled");
+
+// IOhandler.unzip(zipFilePath, pathUnzipped)
+//   .then(() => {
+//     console.log("ZIP file unzipped successfully.");
+//     return IOhandler.readDir(pathUnzipped);
+//   })
+//   .then((pngFiles) => {
+//     console.log("List of PNG files:", pngFiles);
+
+//     // Create an array of Promises to process each PNG file
+//     const processingPromises = pngFiles.map((file) => {
+//       const inputPath = path.join(pathUnzipped, file);
+//       const outputPath = path.join(pathProcessed, path.basename(file));
+//       return IOhandler.grayScale(inputPath, outputPath);
+//     });
+
+//     // Use Promise.all to ensure all files are processed before proceeding
+//     return Promise.all(processingPromises);
+//   })
+//   .then(() => {
+//     console.log("Grayscale processing completed for all PNG files.");
+//   })
+//   .catch((err) => {
+//     console.error("An error occurred:", err);
+//   });
