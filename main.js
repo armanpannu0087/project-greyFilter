@@ -34,8 +34,8 @@ const pathUnzipped = path.join(__dirname, "unzipped");
 const pathProcessed = path.join(__dirname, "grayscaled");
 
 IOhandler
- .processImages(zipFilePath, pathUnzipped, pathProcessed)
- .then(() => {
+  .processImages(zipFilePath, pathUnzipped, pathProcessed)
+  .then(() => {
     console.log('Extraction and processing complete');
   })
   .catch((error) => {
