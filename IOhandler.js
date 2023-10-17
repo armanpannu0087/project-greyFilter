@@ -8,6 +8,8 @@
  *
  */
 
+const { dir } = require("console");
+
 const unzipper = require("unzipper"),
   fs = require("fs"),
   PNG = require("pngjs").PNG,
@@ -25,7 +27,7 @@ const unzip = (pathIn, pathOut) => {
     fs.createReadStream(pathIn)
     .pipe(unzipper.Extract({path:pathOut}))
     .on("close", () => resolve())
-    .on("error", () => reject(err));
+    .on("error", (err) => reject(err));
   });
 };
 
@@ -35,19 +37,38 @@ const unzip = (pathIn, pathOut) => {
  * @param {string} path
  * @return {promise}
  */
+// const readDir = (dir) => {
+//   return new Promise((resolve,reject)=>{
+//     fs.readdir(dir,(err,files)=>{
+//       if(err){
+//         reject(err);
+//       } else{
+//         const pngFiles = files.filter((file)=> path.extname(file).toLowerCase() === '.png');
+//         resolve (pngFiles.map((file) => path.join(dir,file)));
+//       }
+//     });
+//   });
+// };
+
 const readDir = (dir) => {
-  return new Promise((reject,resolve)=>{
-    fs.readdir(dir,(err,files)=>{
-      if(err){
+  return new Promise((resolve, reject) => {
+    fs.readdir(dir, (err, files) => {
+      if (err) {
         reject(err);
-      } else{
-        const pngFiles = files.filter((file)=> path.extname(file).toLowerCase() === '.png');
-        resolve (pngFiles.map((file) => path.join(dir,file)));
+      } else {
+        const pngFiles = files.filter((file) => path.extname(file).toLowerCase() === '.png');
+        resolve(pngFiles.map((file) => path.join(dir, file)));
       }
     });
   });
 };
 
+
+
+// {
+//   const pngFiles = files.filter((file)=> path.extname(file).toLowerCase() === '.png');
+//   resolve (pngFiles.map((file) => path.join(dir,file)));
+// }
 /**
  * Description: Read in png file by given pathIn,
  * convert to grayscale and write to given pathOut
@@ -85,26 +106,71 @@ const grayScale = (pathIn, pathOut) => {
 };
 
 /**
- * Description: Process images in the zip file, extracting and applying the grayscale filter to each image, then display a success message
- *
- * @param {string} zipPath
- * @param {string} outputPathUnzipped
- * @param {string} outputPathProcessed
- * @return {promise}
- */
-const processImages = (zipPath, outputPathUnzipped, outputPathProcessed) => {
-  return unzip(zipPath, outputPathUnzipped)
-    .then(() => readDir(outputPathUnzipped))
-    .then((pngFiles) => {
-      const processingPromises = pngFiles.map((filePath) => {
-        const outputFilePath = path.join(outputPathProcessed, path.basename(filePath));
-        return grayScale(filePath, outputFilePath);
-      });
-      return Promise.all(processingPromises);
-    });
-};
+//  * Description: Process images in the zip file, extracting and applying the grayscale filter to each image, then display a success message
+//  *
+//  * @param {string} zipPath
+//  * @param {string} outputPathUnzipped
+//  * @param {string} outputPathProcessed
+//  * @return {promise}
+//  */
 
 
 module.exports = {
-  processImages
+  unzip,
+  readDir,
+  grayScale,
 };
+// const processImages = (zipPath, outputPathUnzipped, outputPathProcessed) => {
+//   return unzip(zipPath, outputPathUnzipped)
+//     .then(() => readDir(outputPathUnzipped))
+//     .then((pngFiles) => {
+//       const processingPromises = pngFiles.map((filePath) => {
+//         const outputFilePath = path.join(outputPathProcessed, path.basename(filePath));
+//         return grayScale(filePath, outputFilePath);
+//       });
+//       return Promise.all(processingPromises);
+//     });
+// };
+
+
+// module.exports = {
+//   processImages
+//   grayScale
+
+// };
+
+
+// /**
+//  * Description: Read in png file by given pathIn,
+//  * convert to grayscale, and write to given pathOut
+//  *
+//  * @param {string} pathIn
+//  * @param {string} pathOut
+//  */
+// const grayScale = (pathIn, pathOut) => {
+
+
+//   const readStream = createReadStream(pathIn);
+//   const writeStream = createWriteStream(pathOut);
+
+//   readStream
+//     .pipe(new PNG())
+//     .on("parsed", function () {
+//       handleGrayScale(this); 
+//       this.pack().pipe(writeStream);
+//     })
+//     .on("error", (err) => {
+//       console.error("An error occurred:", err);
+//       throw err; // Re-throw the error for downstream handling
+//     });
+
+// };
+
+
+
+
+// module.exports = {
+//   unzip,
+//   readDir,
+//   grayScale,
+// };
